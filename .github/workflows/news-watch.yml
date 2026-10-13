@@ -31,12 +31,16 @@ jobs:
         run: node watcher.js
       - name: Store seen headlines
         run: |
-          if ! git diff --quiet -- state/seen.json; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -f state/seen.json ]; then
             git add state/seen.json
-            git commit -m "Update NSZO seen headlines [skip ci]"
-            git push
+            if ! git diff --cached --quiet; then
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git commit -m "Update NSZO seen headlines"
+              git push
+            else
+              echo "No new state to save"
+            fi
           else
-            echo "No new state to save"
+            echo "State file not found"
           fi
